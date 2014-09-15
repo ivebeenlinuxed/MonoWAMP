@@ -201,15 +201,20 @@ namespace WAMPServer
 			}
 		}
 
+		public void Close(WebSocketCloseStatus status) {
+			WebSocketFrame frame = new WebSocketFrame ();
+			frame.opcode = (byte)WebSocketOpcode.CLOSE;
+			frame.payloadData = BitConverter.GetBytes(status);
+			byte[] byteData = frame.Encode ();
+			clientSocket.Send (byteData);
+			//TODO what happens if we don't ever send a reply? We don't close?
+		}
+
 		/**
 		 * Close the connection
 		 */
 		public void Close() {
-			WebSocketFrame frame = new WebSocketFrame ();
-			frame.opcode = (byte)WebSocketOpcode.CLOSE;
-			byte[] byteData = frame.Encode ();
-			clientSocket.Send (byteData);
-			//TODO what happens if we don't ever send a reply? We don't close?
+			this.Close(WebSocketCloseStatus.NORMAL);
 		}
 	}
 }

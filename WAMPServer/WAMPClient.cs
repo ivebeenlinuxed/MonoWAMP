@@ -59,7 +59,7 @@ namespace WAMPServer
 			}
 		}
 
-		protected void OnWAMPSubscribe(JArray message) {
+		protected virtual void OnWAMPSubscribe(JArray message) {
 			JArray packet = new JArray ();
 			packet.Add (WAMPMessageType.SUBSCRIBED);
 			packet.Add (message [1]);
@@ -70,7 +70,7 @@ namespace WAMPServer
 			this.Send (packet.ToString ());
 		}
 
-		protected void OnWAMPHello(JArray message) {
+		protected virtual void OnWAMPHello(JArray message) {
 			this.realm = (string)message [1];
 			foreach (KeyValuePair<string, JToken> obj in (JObject)message[2]) {
 				WAMPRole role = new WAMPRole ();
