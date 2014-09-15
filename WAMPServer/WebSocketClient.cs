@@ -171,7 +171,7 @@ namespace WAMPServer
 		 * Send binary data
 		 */
 		public void Send(byte[] data) {
-			//TODO what happens if frame is bigger than 2^64? Fragementation!
+			//TODO what happens if frame is bigger than 2^64? Fragementation! Where do we want to handle that?
 			WebSocketFrame frame = new WebSocketFrame ();
 			frame.payloadData = data;
 			frame.opcode = (byte)WebSocketOpcode.BINARY;
@@ -193,8 +193,6 @@ namespace WAMPServer
 
 		private void SendCallback(IAsyncResult ar) {
 			try {
-				// Retrieve the socket from the state object.
-
 				// Complete sending the data to the remote device.
 				int bytesSent = clientSocket.EndSend(ar);
 				Console.WriteLine("Sent {0} bytes to client.", bytesSent);
