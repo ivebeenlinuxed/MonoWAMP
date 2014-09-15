@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{50022886-0BF8-4F0E-8305-728C5C6C4806}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>WAMPServer</RootNamespace>
+    <AssemblyName>WAMPServer</AssemblyName>
+    <StartupObject>WAMPServer.MainClass</StartupObject>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <DebugType>full</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Externalconsole>true</Externalconsole>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Net" />
+    <Reference Include="Mono.Http" />
+    <Reference Include="System.Web.Http, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>JSON\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WebSocketFrame.cs" />
+    <Compile Include="WebSocketOpcode.cs" />
+    <Compile Include="WAMPServer.cs" />
+    <Compile Include="WebSocketServer.cs" />
+    <Compile Include="WebSocketClient.cs" />
+    <Compile Include="WAMPClient.cs" />
+    <Compile Include="WAMPMessageType.cs" />
+    <Compile Include="WAMPRole.cs" />
+    <Compile Include="WebSocketCloseStatus.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Folder Include="JSON\" />
+    <Folder Include="Protocol\" />
+    <Folder Include="Protocol\JSON\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="JSON\Newtonsoft.Json.dll" />
+    <None Include="JSON\Newtonsoft.Json.pdb" />
+    <None Include="JSON\Newtonsoft.Json.xml" />
+  </ItemGroup>
+</Project>
