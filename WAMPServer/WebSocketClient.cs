@@ -48,6 +48,7 @@ namespace WAMPServer
 				if (frame.opcode == (byte)WebSocketOpcode.PING) {
 					WebSocketFrame f = new WebSocketFrame();
 					f.opcode = (byte)WebSocketOpcode.PONG;
+					f.payloadData = frame.payloadData;
 					client.Send(f);
 				}
 			});
@@ -162,6 +163,10 @@ namespace WAMPServer
 			frame.opcode = (byte)WebSocketOpcode.TEXT;
 			byteData = frame.Encode ();
 
+			if (!clientSocket.Connected) {
+				return;
+			}
+
 			// Begin sending the data to the remote device.
 			clientSocket.BeginSend(byteData, 0, byteData.Length, 0,
 			                  new AsyncCallback(this.SendCallback), this);
@@ -177,6 +182,10 @@ namespace WAMPServer
 			frame.opcode = (byte)WebSocketOpcode.BINARY;
 			byte[] byteData = frame.Encode ();
 
+			if (!clientSocket.Connected) {
+				return;
+			}
+
 			// Begin sending the data to the remote device.
 			clientSocket.BeginSend(byteData, 0, byteData.Length, 0,
 			                       new AsyncCallback(this.SendCallback), this);
@@ -184,6 +193,10 @@ namespace WAMPServer
 
 		public void Send(WebSocketFrame frame) {
 			byte[] byteData = frame.Encode ();
+
+			if (!clientSocket.Connected) {
+				return;
+			}
 
 			// Begin sending the data to the remote device.
 			clientSocket.BeginSend(byteData, 0, byteData.Length, 0,
@@ -204,7 +217,7 @@ namespace WAMPServer
 		public void Close(WebSocketCloseStatus status) {
 			WebSocketFrame frame = new WebSocketFrame ();
 			frame.opcode = (byte)WebSocketOpcode.CLOSE;
-			frame.payloadData = BitConverter.GetBytes(status);
+			frame.payloadData = BitConverter.GetBytes((int)status);
 			byte[] byteData = frame.Encode ();
 			clientSocket.Send (byteData);
 			//TODO what happens if we don't ever send a reply? We don't close?

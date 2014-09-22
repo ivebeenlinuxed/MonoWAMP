@@ -13,7 +13,7 @@ namespace WAMPServer
 		public bool mask;
 		public ulong payloadLength;
 		public byte[] maskingKey;
-		public byte[] payloadData;
+		public byte[] payloadData = new byte[0];
 
 
 		public WebSocketFrame ()
@@ -40,10 +40,13 @@ namespace WAMPServer
 				this.payloadLength = BitConverter.ToUInt64(rdr.ReadBytes(2), 0);
 			}
 			if (this.mask) {
-				this.maskingKey = rdr.ReadBytes(4);
+				this.maskingKey = rdr.ReadBytes (4);
+				this.payloadData = this.ToggleDataMask (rdr.ReadBytes ((int)this.payloadLength));
+			} else {
+				this.payloadData = rdr.ReadBytes ((int)this.payloadLength);
 			}
 
-			this.payloadData = this.ToggleDataMask(rdr.ReadBytes ((int)this.payloadLength));
+
 		}
 
 		public byte[] Encode() {
@@ -71,17 +74,21 @@ namespace WAMPServer
 
 			buf = 0x00;
 			buf |= (byte)(this.mask? 0x80 : 0x00);
-			if (payloadData.Length >= (Math.Pow(2, 16))) {
-				//4 byte
-				buf |= 0x7E;
-				stream.WriteByte (buf);
-				stream.Write(BitConverter.GetBytes((ulong)payloadData.Length), 0, 8);
-			} else if (payloadData.Length >= 126) {
-				//2 byte
+
+			byte[] packetLength = BitConverter.GetBytes ((long)payloadData.Length);
+			if (BitConverter.IsLittleEndian) {
+				Array.Reverse (packetLength);
+			}
+			if (payloadData.Length >= 65536) {
+				//8 byte
 				buf |= 0x7F;
 				stream.WriteByte (buf);
-				stream.Write(BitConverter.GetBytes((ushort)payloadData.Length), 0, 2);
-
+				stream.Write (packetLength, 0, 8);
+			} else if (payloadData.Length >= 126) {
+				//2 byte
+				buf |= 0x7E;
+				stream.WriteByte (buf);
+				stream.Write (packetLength, 6, 2);
 			} else {
 				buf |= (byte)payloadData.Length;
 				stream.WriteByte (buf);
@@ -95,11 +102,9 @@ namespace WAMPServer
 			}
 
 			stream.Seek (0, SeekOrigin.Begin);
+			//TODO technically stream.Length could be a 64 bit value. Read, however, only accepts 32-bit arguments
 			byte[] outbuf = new byte[stream.Length];
-			while ((stream.Length - stream.Position) > 0) {
-				long toEnd = stream.Length - stream.Position;
-				stream.Read (outbuf, 0, toEnd<1024? (int)toEnd : 1024);
-			}
+			stream.Read (outbuf, 0, (int)stream.Length);
 			return outbuf;
 		}
 
