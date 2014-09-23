@@ -97,7 +97,11 @@ namespace WAMPServer
 			} else if (message.Count == 6) {
 				svr.InvokeEvent ((string)message [3], invocationID, (JArray)message [4], (JObject)message [5]);
 			}
+
+
+
 			//TODO Add errors
+
 		}
 
 		protected virtual void OnWAMPPublish(JArray message) {

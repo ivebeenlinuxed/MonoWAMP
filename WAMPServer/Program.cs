@@ -4,15 +4,33 @@ using System.Net.Sockets;
 using System.IO;
 using Newtonsoft.Json.Linq;
 using System.Text;
+//using Mono.Options;
+using System.Collections.Generic;
+//using Mono.Options;
 
 namespace WAMPServer
 {
 	class MainClass
 	{
+		public static Dictionary<string, string> args = new Dictionary<string, string>();
+
 		public static void Main (string[] args)
 		{
-			Console.WriteLine ("Hello World!");
-			IPEndPoint ip = new IPEndPoint(IPAddress.Any, 8080);
+			Console.WriteLine ("Boiler WebSocket Server");
+			/*
+			OptionSet options = new OptionSet () {
+				{"b|boiler=", "the location of {BOILER} framework", (string v) => {MainClass.args.Add("boiler", v);} }
+			};
+
+			try {
+				options.Parse (args);
+			} catch (OptionException e) {
+				Console.WriteLine (e.Message);
+				options.WriteOptionDescriptions (Console.Out);
+				return;
+			}
+			*/
+			IPEndPoint ip = new IPEndPoint(IPAddress.Any, 8282);
 			WAMPServer wamps = new WAMPServer (ip);
 
 

@@ -4,6 +4,7 @@ using System.Text;
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
+using System.Threading;
 
 namespace WAMPServer
 {
@@ -52,7 +53,11 @@ namespace WAMPServer
 					client.Send(f);
 				}
 			});
+
+
 		}
+
+
 
 		private void ReadCallback(IAsyncResult ar) {
 			//TODO DoS? What happens if packet is too long?

@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace WAMPServer
 {
@@ -34,7 +35,7 @@ namespace WAMPServer
 			foreach (WAMPClient c in this.clients) {
 				Dictionary<string, string> cpyTopics = c.subscribedTopics;
 				foreach (KeyValuePair<string, string> kvp in cpyTopics) {
-					if (kvp.Value == topic) {
+					if (topic.StartsWith(kvp.Value)) {
 						JArray packet = new JArray ();
 						packet.Add (WAMPMessageType.EVENT);
 						packet.Add (kvp.Key);
@@ -53,6 +54,9 @@ namespace WAMPServer
 
 		public void PublishEvent(string topic, string publishID,  JArray args) {
 			foreach (WAMPClient c in clients) {
+				if (!c.clientSocket.Connected) {
+					return;
+				}
 				if (c.subscribedTopics.ContainsKey(topic)) {
 					Console.WriteLine("Publishing to {0}", ((IPEndPoint)c.clientSocket.RemoteEndPoint).Address.ToString());
 					JArray packet = new JArray();
@@ -85,11 +89,27 @@ namespace WAMPServer
 		}
 
 		public void InvokeEvent(string methodID, string invocationID, JArray args) {
+			Process boiler = new Process();
+			boiler.StartInfo.UseShellExecute = false;
+			boiler.StartInfo.FileName = "/var/www/portal/htdocs/index.php --session 123 "+methodID.Replace("/", " ");
+			boiler.StartInfo.CreateNoWindow = true;
+			boiler.Start();
+			boiler.WaitForExit();
+			string output = "";
+			while (!boiler.StandardOutput.EndOfStream) {
+				output += boiler.StandardOutput.ReadLine ();
+			}
+			JArray packet = new JArray();
+			packet.Add (WAMPMessageType.RESULT);
+			packet.Add (new JObject());
+			JArray return_args = new JArray();
+			args.Add(return_args);
+
 
 		}
 
 		public void InvokeEvent(string methodID, string invocationID) {
-
+			this.InvokeEvent(methodID, invocationID, new JArray());
 		}
 	}
 }

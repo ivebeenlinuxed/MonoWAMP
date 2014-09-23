@@ -28,6 +28,23 @@ namespace WAMPServer
 				Console.WriteLine (e.ToString ());
 			}
 			Console.WriteLine("Server Ready...");
+			Timer t = new Timer (this.clearClients, null, TimeSpan.Zero, TimeSpan.FromSeconds(5));
+
+		}
+
+		private void clearClients(object state) {
+			List<WebSocketClient> newList = new List<WebSocketClient> ();
+			foreach (WebSocketClient client in this.clients) {
+				if (client.clientSocket.Connected) {
+					newList.Add (client);
+				}
+			}
+			if (clients.Count != newList.Count) {
+				Console.WriteLine ("Cleared Clients: {0} old, {1} new", clients.Count, newList.Count);
+			}
+			lock (clients) {
+				clients = newList;
+			}
 		}
 
 		public virtual void AcceptCallback(IAsyncResult ar) {
