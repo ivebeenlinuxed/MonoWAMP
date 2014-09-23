@@ -21,7 +21,57 @@ namespace WAMPServer
 
 		}
 
-		public void Parse(byte[] frame) {
+		public static bool HaveFullPacket(byte[] stream) {
+			ulong extraBytes = 2;
+			if ((ulong)stream.Length < extraBytes) {
+				return false;
+			}
+
+
+			if ((stream [1] & 0x80) > 0) {
+				//Add a byte for the mask
+				extraBytes += 4;
+			}
+
+			if (((uint)stream [1] & 0x7F) == 126) {
+				extraBytes += 2;
+				if ((ulong)stream.Length < extraBytes) {
+					return false;
+				}
+				
+				byte[] packetSize = new byte[2];
+				Array.Copy (stream, 2, packetSize, 0, 2);
+				packetSize = ToNetworkByteOrder (packetSize);
+				extraBytes += BitConverter.ToUInt16 (packetSize, 0);
+			} else if (((uint)stream [1] & 0x7F) == 127) {
+				extraBytes += 8;
+				if ((ulong)stream.Length < extraBytes) {
+					return false;
+				}
+				byte[] packetSize = new byte[8];
+				Array.Copy (stream, 2, packetSize, 0, 8);
+				packetSize = ToNetworkByteOrder (packetSize);
+				extraBytes += BitConverter.ToUInt64 (packetSize, 0);
+			} else {
+				extraBytes += (uint)stream [1] & 0x7F;
+			}
+
+
+
+			if ((ulong)stream.Length < extraBytes) {
+				return false;
+			}
+			return true;
+		}
+
+		private static byte[] ToNetworkByteOrder(byte[] input) {
+			if (BitConverter.IsLittleEndian) {
+				Array.Reverse (input);
+			}
+			return input;
+		}
+
+		public ulong Parse(byte[] frame) {
 			byte buf;
 			System.IO.MemoryStream stm = new System.IO.MemoryStream( frame );
 			System.IO.BinaryReader rdr = new System.IO.BinaryReader( stm );
@@ -35,9 +85,17 @@ namespace WAMPServer
 			this.mask = (buf & 0x80) > 0;
 			this.payloadLength = (uint)buf & (0x7F);
 			if (this.payloadLength == 126) {
-				this.payloadLength = BitConverter.ToUInt16(rdr.ReadBytes(2), 0);
+				byte[] endianLength = rdr.ReadBytes(2);
+				if (BitConverter.IsLittleEndian) {
+					Array.Reverse (endianLength);
+				}
+				this.payloadLength = BitConverter.ToUInt16(endianLength, 0);
 			} else if (this.payloadLength == 127) {
-				this.payloadLength = BitConverter.ToUInt64(rdr.ReadBytes(2), 0);
+				byte[] endianLength = rdr.ReadBytes(8);
+				if (BitConverter.IsLittleEndian) {
+					Array.Reverse (endianLength);
+				}
+				this.payloadLength = BitConverter.ToUInt16(endianLength, 0);
 			}
 			if (this.mask) {
 				this.maskingKey = rdr.ReadBytes (4);
@@ -46,7 +104,7 @@ namespace WAMPServer
 				this.payloadData = rdr.ReadBytes ((int)this.payloadLength);
 			}
 
-
+			return (ulong)stm.Position;
 		}
 
 		public byte[] Encode() {

@@ -64,36 +64,53 @@ namespace WAMPServer
 			int bytesRead = this.clientSocket.EndReceive (ar);
 			if (bytesRead > 0) {
 				packetStream.Write (buffer, 0, bytesRead);
-				if (bytesRead < BUFFER_SIZE) {
-					Console.WriteLine ("Got {0} bytes of data", bytesRead);
-					packetStream.Seek (0, SeekOrigin.Begin);
-					byte[] buf = new byte[packetStream.Length];
-					packetStream.Read (buf, 0, (int)packetStream.Length);
+				Console.WriteLine ("Got {0} bytes of data", bytesRead);
+
+				byte[] buf = packetStream.ToArray ();
+
+				//Handshake first...
+				if (handshake == null) {
+					string strHandshake = Encoding.UTF8.GetString (buf);
+					//End of an HTTP header
+					if (strHandshake.EndsWith ("\r\n\r\n")) {
+						Console.WriteLine ("Got Handshake");
+						this.DoHandshake (strHandshake);
+					}
 					packetStream.Close ();
-					if (handshake == null) {
-
-						this.DoHandshake (Encoding.UTF8.GetString(buf));
-					} else {
+					packetStream = new MemoryStream ();
+				} else {
+					while (WebSocketFrame.HaveFullPacket (buf)) {
+						Console.WriteLine ("Got a Packet");
 						WebSocketFrame frame = new WebSocketFrame ();
-						frame.Parse (buf);
-
-						if (frame.opcode == (byte)WebSocketOpcode.TEXT) {
-							string echo = Encoding.UTF8.GetString (frame.payloadData);
-							Console.WriteLine("Recieved Message: "+ echo);
-						}
+						//Read bytes off the stream
+						ulong readBytes = frame.Parse (buf);
 
 						if (OnPacketReceived != null) {
 							OnPacketReceived (this, frame);
 						}
+
+
+
+						//Pull off unread bytes
+						byte[] newbuf = new byte[(ulong)buf.Length - readBytes];
+						Array.Copy (buf, (int)readBytes, newbuf, 0, newbuf.Length);
+						buf = newbuf;
+
+
+						//Refresh the stream
+						packetStream.Close ();
+						packetStream = new MemoryStream ();
+						packetStream.Write (newbuf, 0, newbuf.Length);
 
 					}
 				}
 
 				if (clientSocket.Connected) {
 					clientSocket.BeginReceive (this.buffer, 0, BUFFER_SIZE, 0,
-					                          new AsyncCallback (this.ReadCallback), this);
+					                           new AsyncCallback (this.ReadCallback), this);
 				}
 			}
+
 		}
 
 		private void DoHandshake(string content) {

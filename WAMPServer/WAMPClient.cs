@@ -6,6 +6,7 @@ using Newtonsoft.Json.Linq;
 using System.Text;
 using System.Security.Cryptography;
 using System.Net;
+using System.IO;
 
 namespace WAMPServer
 {
@@ -17,6 +18,9 @@ namespace WAMPServer
 		public string realm;
 		public Dictionary<string, string> subscribedTopics = new Dictionary<string, string> ();
 		public Dictionary<string, string> registeredProcedures = new Dictionary<string, string> ();
+
+		private MemoryStream fragStream;
+		private WebSocketFrame fragFrame;
 
 		public WAMPClient (WAMPServer server, Socket s) : base(server, s)
 		{
@@ -34,6 +38,22 @@ namespace WAMPServer
 			if (frame.opcode == (byte)WebSocketOpcode.CLOSE) {
 				return;
 			}
+
+			if (!frame.fin) {
+				if (fragFrame == null) {
+					fragFrame = frame;
+				}
+				fragStream.Write (frame.payloadData, 0, (int)frame.payloadLength);
+			} else if (fragFrame != null) {
+				fragStream.Seek (0, SeekOrigin.Begin);
+
+				byte[] buf = new byte[fragStream.Length];
+				fragStream.Read (buf, 0, buf.Length);
+
+				fragFrame.payloadData = buf;
+				fragFrame.Parse(fragFrame.Encode ());
+			}
+
 			JArray wampPacket = JArray.Parse(Encoding.UTF8.GetString(frame.payloadData));
 			switch ((WAMPMessageType)((int)wampPacket [0])) {
 			case WAMPMessageType.HELLO:

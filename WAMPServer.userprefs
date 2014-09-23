@@ -1,19 +1,15 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Release|x86" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="WAMPServer/WAMPClient.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="WAMPServer/WebSocketFrame.cs">
     <Files>
-      <File FileName="WAMPServer/Program.cs" Line="1" Column="1" />
-      <File FileName="WAMPServer/WebsocketServer.cs" Line="1" Column="1" />
-      <File FileName="WAMPServer/WebsocketClient.cs" Line="1" Column="1" />
-      <File FileName="WAMPServer/WebSocketFrame.cs" Line="46" Column="15" />
-      <File FileName="WAMPServer/WebSocketOpcode.cs" Line="12" Column="13" />
-      <File FileName="WAMPServer/WebSocketClient.cs" Line="86" Column="1" />
-      <File FileName="WAMPServer/WAMPClient.cs" Line="37" Column="1" />
+      <File FileName="WAMPServer/WebSocketClient.cs" Line="100" Column="1" />
+      <File FileName="WAMPServer/WebSocketFrame.cs" Line="27" Column="13" />
+      <File FileName="WAMPServer/WAMPClient.cs" Line="46" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore>
-      <Breakpoint file="/mnt/home/will.tinsdeall/projects/WAMPSharp/WAMPServer/WebSocketFrame.cs" line="46" column="15" />
+      <Breakpoint file="/mnt/home/will.tinsdeall/projects/WAMPSharp/WAMPServer/WebSocketFrame.cs" line="26" column="1" />
     </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches>
