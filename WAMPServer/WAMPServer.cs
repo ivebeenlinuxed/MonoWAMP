@@ -32,21 +32,23 @@ namespace WAMPServer
 		}
 
 		public void PublishEvent(string topic, string publishID, JArray args, JObject dict) {
-			foreach (WAMPClient c in this.clients) {
-				Dictionary<string, string> cpyTopics = c.subscribedTopics;
-				foreach (KeyValuePair<string, string> kvp in cpyTopics) {
-					if (topic.StartsWith(kvp.Value)) {
-						JArray packet = new JArray ();
-						packet.Add (WAMPMessageType.EVENT);
-						packet.Add (kvp.Key);
-						packet.Add (publishID);
-						packet.Add (new JObject ());
-						packet.Add (args);
-						packet.Add (dict);
-						if (c.clientSocket.Connected) {
-							Console.WriteLine ("Publishing {0} to {1}", topic, ((IPEndPoint)c.clientSocket.RemoteEndPoint).Address.ToString ());
+			lock (this.clients) {
+				foreach (WAMPClient c in this.clients) {
+					Dictionary<string, string> cpyTopics = c.subscribedTopics;
+					foreach (KeyValuePair<string, string> kvp in cpyTopics) {
+						if (topic.StartsWith (kvp.Value)) {
+							JArray packet = new JArray ();
+							packet.Add (WAMPMessageType.EVENT);
+							packet.Add (kvp.Key);
+							packet.Add (publishID);
+							packet.Add (new JObject ());
+							packet.Add (args);
+							packet.Add (dict);
+							if (c.clientSocket.Connected) {
+								Console.WriteLine ("Publishing {0} to {1}", topic, ((IPEndPoint)c.clientSocket.RemoteEndPoint).Address.ToString ());
+							}
+							c.Send (packet.ToString ());
 						}
-						c.Send (packet.ToString ());
 					}
 				}
 			}

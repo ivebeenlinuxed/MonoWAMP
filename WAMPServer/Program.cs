@@ -18,6 +18,8 @@ namespace WAMPServer
 		{
 			Console.WriteLine ("Boiler WebSocket Server");
 			/*
+			 * TODO implement options
+			 * 
 			OptionSet options = new OptionSet () {
 				{"b|boiler=", "the location of {BOILER} framework", (string v) => {MainClass.args.Add("boiler", v);} }
 			};
@@ -30,18 +32,24 @@ namespace WAMPServer
 				return;
 			}
 			*/
+
+			//TODO change to config file
 			IPEndPoint ip = new IPEndPoint(IPAddress.Any, 8282);
+
+			//TODO add TLS
 			WAMPServer wamps = new WAMPServer (ip);
 
-
-			Socket s = new Socket (AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+			//TODO change to config file
 			IPEndPoint ep = new IPEndPoint (IPAddress.Any, 8181);
+			Socket s = new Socket (AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 			try {
 				s.Bind(ep);
 				s.Listen(100);
 			} catch (Exception e) {
 				Console.WriteLine (e.ToString ());
 			}
+
+			//TODO very rudimentary. We should really develop a WAMP client for PHP to publish through the proper WAMP channels
 			while (true) {
 				Console.WriteLine ("Waiting for request...");
 				Socket client = s.Accept();
@@ -63,7 +71,7 @@ namespace WAMPServer
 
 
 
-
+			//TODO send WebSocketCloseStatus.GOING_AWAY to clients still connected
 
 		}
 	}

@@ -33,6 +33,7 @@ namespace WAMPServer
 				extraBytes += 4;
 			}
 
+			//TODO Packet too long error? WebSocketCloseStatus.MESSAGE_TOO_BIG
 			if (((uint)stream [1] & 0x7F) == 126) {
 				extraBytes += 2;
 				if ((ulong)stream.Length < extraBytes) {
@@ -76,6 +77,7 @@ namespace WAMPServer
 			System.IO.MemoryStream stm = new System.IO.MemoryStream( frame );
 			System.IO.BinaryReader rdr = new System.IO.BinaryReader( stm );
 			buf = rdr.ReadByte ();
+			//TODO chrome closes if RSV1-3 are set? Should we WebSocketCloseStatus.PROTOCOL_ERROR
 			this.fin = (buf & 0x80) > 0;
 			this.rsv1 = (buf & 0x40) > 0;
 			this.rsv2 = (buf & 0x20) > 0;

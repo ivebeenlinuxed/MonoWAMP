@@ -204,6 +204,7 @@ namespace WAMPServer
 			frame.opcode = (byte)WebSocketOpcode.BINARY;
 			byte[] byteData = frame.Encode ();
 
+			//TODO What about deflate compression header?
 			if (!clientSocket.Connected) {
 				return;
 			}
@@ -216,6 +217,7 @@ namespace WAMPServer
 		public void Send(WebSocketFrame frame) {
 			byte[] byteData = frame.Encode ();
 
+			//TODO What about deflate compression header?
 			if (!clientSocket.Connected) {
 				return;
 			}
